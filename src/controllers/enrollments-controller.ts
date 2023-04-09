@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares';
-import enrollmentsService, { CreateOrUpdateEnrollmentWithAddress } from '@/services/enrollments-service';
+import enrollmentsService from '@/services/enrollments-service';
 
 export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
