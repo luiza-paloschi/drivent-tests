@@ -1,6 +1,6 @@
 import { Payment } from '@prisma/client';
 import { prisma } from '@/config';
-import { PaymentBody, PaymentData } from '@/services';
+import { PaymentData } from '@/services';
 
 async function findUserPayment(ticketId: number): Promise<Payment> {
   return await prisma.payment.findFirst({
