@@ -17,3 +17,15 @@ export async function findPayment(req: AuthenticatedRequest, res: Response) {
     return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
+
+export async function createPayment(req: AuthenticatedRequest, res: Response) {
+  try {
+    const createdPayment = await paymentsService.createPayment({ ...req.body, userId: req.userId });
+
+    return res.status(httpStatus.OK).send(createdPayment);
+  } catch (error) {
+    if (error.name === 'NotFoundError') return res.sendStatus(httpStatus.NOT_FOUND);
+    if (error.name === 'UnauthorizedError') return res.sendStatus(httpStatus.UNAUTHORIZED);
+    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+  }
+}

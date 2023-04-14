@@ -7,6 +7,23 @@ export type FindPaymentParams = {
   ticketId: number;
 };
 
+export type PaymentBody = FindPaymentParams & {
+  cardData: {
+    issuer: string;
+    number: number;
+    name: string;
+    expirationDate: Date;
+    cvv: number;
+  };
+};
+
+export type PaymentData = {
+  ticketId: number;
+  value: number;
+  cardIssuer: string;
+  cardLastDigits: string;
+};
+
 async function findUserPayment({ ticketId, userId }: FindPaymentParams) {
   if (!ticketId) throw invalidDataError(['invalid ticket id']);
 
@@ -22,8 +39,31 @@ async function findUserPayment({ ticketId, userId }: FindPaymentParams) {
   return payment;
 }
 
+async function createPayment(params: PaymentBody) {
+  const ticket = await ticketRepository.findTicketAndEnrollment(params.ticketId);
+  if (!ticket) throw notFoundError();
+
+  if (ticket.Enrollment.userId !== params.userId) throw unauthorizedError();
+
+  const price = await ticketRepository.findUserTicket(ticket.enrollmentId);
+
+  const paymentData: PaymentData = {
+    ticketId: params.ticketId,
+    value: price.TicketType.price,
+    cardIssuer: params.cardData.issuer,
+    cardLastDigits: params.cardData.number.toString().slice(-4),
+  };
+
+  const createdPayment = await paymentRepository.createPayment(paymentData);
+
+  await ticketRepository.updateTicketStatus(ticket.id);
+
+  return createdPayment;
+}
+
 const paymentsService = {
   findUserPayment,
+  createPayment,
 };
 
 export default paymentsService;
